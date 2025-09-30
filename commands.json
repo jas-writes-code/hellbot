@@ -1,0 +1,14 @@
+{
+  "mo": {
+    "description": "Fetches the latest Major Order(s) and Briefing(s)",
+    "action": "major_order"
+  },
+  "dispatch": {
+    "description": "Fetches the latest dispatches.",
+    "action": "dispatch"
+  },
+  "status": {
+    "description": "Displays the status of high-priority planets.",
+    "action": "status"
+  }
+}
