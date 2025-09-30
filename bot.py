@@ -7,14 +7,26 @@ client = Client(intents=Intents.all())
 with open("key.json", "r") as file:
     info = json.load(file)
 key = info["key"]
+error_message = None
 
 @tasks.loop(minutes=1)
 async def monitor():
+    global error_message
     target = client.get_channel(int(info["news"]))
-    discard, state = await hellmonitor.fetch("/api/v1/assignments")
+    test, state = await hellmonitor.fetch("/api/v1/assignments")
+    if test == "Error":
+        if error_message:
+            await error_message.delete()
+        error_message = await target.send(f"An Error occured. {state}")
+        return
     if int(state) % 28 == 0:
         await major_order(target)
-    discard, state = await hellmonitor.fetch("/api/v1/dispatches")
+    test, state = await hellmonitor.fetch("/api/v1/dispatches")
+    if test == "Error":
+        if error_message:
+            await error_message.delete()
+        error_message = await target.send(f"An Error occured. {state}")
+        return
     if int(state) % 28 == 0:
         await dispatch(target)
 
@@ -38,7 +50,10 @@ async def major_order(channel):
             content += f"\n\n*No currently active Major Order.*"
         for event in mo:
             mo_content = await wrangler.sanitize(event["briefing"])
-            content += f"\n\n**MAJOR ORDER:**\n\n{mo_content}"
+            if int(mostate) % 28 == 0:
+                content += f"\n\n**NEW MAJOR ORDER:**\n\n{mo_content}"
+            else:
+                content += f"\n\n**MAJOR ORDER:**\n\n{mo_content}"
             content += f'\n\n*Expires* <t:{int(await wrangler.retime(event["expiration"]))}:R>'
 
     await channel.send(content)
@@ -90,7 +105,5 @@ async def on_message(message):
                 await func(message.channel)
             else:
                 print(f"No function defined for action '{action_name}'")
-
-
 
 client.run(key)

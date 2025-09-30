@@ -1,11 +1,15 @@
-import requests
+import aiohttp
 import json
 
-def efetch(input):
-    response = requests.get(f"https://api.helldivers2.dev{input}", headers={"x-super-client": "virgildoesthings.com", "x-super-contact": "virgil@virgildoesthings.com"})
-    if response.status_code != 200:
-        raise ValueError(f"Request failed with status {response.status_code}")
-    return response
+async def efetch(input):
+    url = f"https://api.helldivers2.dev{input}"
+    headers = {"x-super-client": "virgildoesthings.com", "x-super-contact": "virgil@virgildoesthings.com"}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as response:
+            if response.status != 200:
+                return "Error", response.status
+            data = await response.json()
+            return data
 
 async def fetch(input):
     with open('log.json', 'r') as f:
@@ -14,7 +18,7 @@ async def fetch(input):
         except json.decoder.JSONDecodeError:
             pass
     try:
-        stream = efetch(input).json()
+        stream = await efetch(input)
     except ValueError as e:
         status_code = e.args[0]  # recover the status code you passed
         return "Error", status_code
