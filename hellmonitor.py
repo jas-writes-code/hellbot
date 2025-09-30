@@ -3,11 +3,9 @@ import json
 
 def efetch(input):
     response = requests.get(f"https://api.helldivers2.dev{input}", headers={"x-super-client": "virgildoesthings.com", "x-super-contact": "virgil@virgildoesthings.com"})
-
-    if not response:
-        return "404 Not Found"
-    else:
-        return response
+    if response.status_code != 200:
+        raise ValueError(f"Request failed with status {response.status_code}")
+    return response
 
 async def fetch(input):
     with open('log.json', 'r') as f:
@@ -15,7 +13,10 @@ async def fetch(input):
             info = json.load(f)
         except json.decoder.JSONDecodeError:
             pass
-    stream = efetch(input).json()
+    try:
+        stream = efetch(input).json()
+    except ValueError:
+        return "Error", efetch(input).status_code
     if type(stream) == dict:
         return stream, 9
     elif type(stream) == list:
@@ -24,9 +25,13 @@ async def fetch(input):
         if item not in info:
             info[item] = {"id": stream[0]["id"]}
             state = 18
-        if stream[0]["id"] != info[item]["id"]:
-            info[item]["id"] = stream[0]["id"]
-            state = 28
+        if stream:
+            if stream[0]["id"] != info[item]["id"]:
+                state = 28 * stream[0]["id"]
+                info[item]["id"] = stream[0]["id"]
+        else:
+            stream = ""
+            state = 38
 
         with open("log.json", "w") as f:
             json.dump(info, f, indent=4)

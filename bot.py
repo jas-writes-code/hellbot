@@ -10,10 +10,16 @@ async def major_order(message):
         content = ""
         mo, mostate = await hellmonitor.fetch("/api/v1/assignments")
         briefing, brstate = await hellmonitor.fetch("/raw/api/WarSeason/801/Status")
+        if mo == "Error":
+            message.channel.send(f"An error has occurred: {mostate}")
+            return
         briefing = briefing["globalEvents"]
         for event in briefing:
+            briefing_title = await wrangler.sanitize(event["title"])
             briefing_content = await wrangler.sanitize(event["message"])
-            content += f"**BRIEFING:**\n\n{briefing_content}"
+            content += f"**BRIEFING:** {briefing_title}\n\n{briefing_content}"
+        if mostate == 38:
+            content += f"\n\n*No currently active Major Order.*"
         for event in mo:
             mo_content = await wrangler.sanitize(event["briefing"])
             content += f"\n\n**MAJOR ORDER:**\n\n{mo_content}"
@@ -25,13 +31,18 @@ async def dispatch(message):
     async with message.channel.typing():
         content = ""
         dis, distate = await hellmonitor.fetch("/api/v1/dispatches")
-        if str(distate)[0] == 2:
+        if dis == "Error":
+            message.channel.send(f"An error has occurred: {distate}")
+            return
+        if distate % 28 == 0:
             content += "**NEW DISPATCHES:**"
         elif str(distate)[0] == 1:
             content += "No last-read detected. Most recent Dispatches:"
         for element in dis[:5]:
-            content += f'\n\n{await wrangler.sanitize(element["message"])}'
-            content += f'\n*Issued* <t:{int(await wrangler.retime(element["published"]))}:R>'
+            content += f'\n-----\n*Issued* <t:{int(await wrangler.retime(element["published"]))}:R>'
+            if element["id"] < distate / 28:
+                content += " **UNREAD**"
+            content += f'\n{await wrangler.sanitize(element["message"])}'
 
     await message.reply(content)
 
@@ -46,19 +57,18 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    with open('commands.json', 'r') as f:
-        commands = json.load(f)
-    parts = message.content.strip().split()
-    cmd = parts[0].lstrip("!")  # remove "!"
-    args = parts[1:]
-    if cmd in commands:
-        action_name = commands[cmd]["action"]
-        func = globals().get(action_name)  # look up function by name
-        if callable(func):
-            await func(message)
-        else:
-            print(f"No function defined for action '{action_name}'")
-    else:
-        print(f"Invalid command: {cmd}")
+    if not message.author.bot or message.author.system:
+        with open('config.json', 'r') as f:
+            commands = json.load(f)
+        parts = message.content.strip().split()
+        cmd = parts[0].lstrip("!")  # remove "!"
+        args = parts[1:]
+        if cmd in commands:
+            action_name = commands[cmd]["action"]
+            func = globals().get(action_name)  # look up function by name
+            if callable(func):
+                await func(message)
+            else:
+                print(f"No function defined for action '{action_name}'")
 
 client.run(key)

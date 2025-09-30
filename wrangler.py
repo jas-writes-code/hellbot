@@ -2,7 +2,6 @@ import re
 from datetime import datetime, timezone
 
 async def retime(iso_str):
-    print(iso_str)
     if '.' in iso_str:
         parts = iso_str.split('.')
         frac = parts[1].rstrip('Z')[:6]  # take first 6 digits
