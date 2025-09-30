@@ -3,7 +3,9 @@ import hellmonitor, wrangler
 import json
 
 client = Client(intents=Intents.all())
-key = "OTQyNDk5OTU2NjU1MjY3ODkw.GDn1Sj.OcJyPpqybwdBoUqtt6yEYuy5NFuOgZxYwK3XpI"
+with open("key.json", "r") as file:
+    token = json.load(file)
+key = token["key"]
 
 async def major_order(message):
     async with message.channel.typing():
