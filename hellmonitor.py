@@ -15,8 +15,9 @@ async def fetch(input):
             pass
     try:
         stream = efetch(input).json()
-    except ValueError:
-        return "Error", efetch(input).status_code
+    except ValueError as e:
+        status_code = e.args[0]  # recover the status code you passed
+        return "Error", status_code
     if type(stream) == dict:
         return stream, 9
     elif type(stream) == list:

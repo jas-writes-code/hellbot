@@ -7,8 +7,12 @@
     "description": "Fetches the latest dispatches.",
     "action": "dispatch"
   },
-  "status": {
+  "prio": {
     "description": "Displays the status of high-priority planets.",
-    "action": "status"
+    "action": "prio"
+  },
+  "planets": {
+    "description": "Lists all currently active planets, their percentages and forecasts.",
+    "action": "planets"
   }
 }

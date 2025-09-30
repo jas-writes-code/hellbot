@@ -2,7 +2,6 @@ from discord.ext import tasks
 from discord import *
 import hellmonitor, wrangler
 import json
-import asyncio
 
 client = Client(intents=Intents.all())
 with open("key.json", "r") as file:
@@ -13,11 +12,14 @@ key = info["key"]
 async def monitor():
     target = client.get_channel(int(info["news"]))
     discard, state = await hellmonitor.fetch("/api/v1/assignments")
-    if state % 28 == 0:
+    if int(state) % 28 == 0:
         await major_order(target)
     discard, state = await hellmonitor.fetch("/api/v1/dispatches")
-    if state % 28 == 0:
+    if int(state) % 28 == 0:
         await dispatch(target)
+
+async def planets(target):
+    pass #being worked on !
 
 async def major_order(channel):
     async with channel.typing():
@@ -48,7 +50,7 @@ async def dispatch(channel):
         if dis == "Error":
             channel.send(f"An error has occurred: {distate}")
             return
-        if distate % 28 == 0:
+        if int(distate) % 28 == 0:
             content += "**NEW DISPATCHES:**"
         elif str(distate)[0] == 1:
             content += "No last-read detected. Most recent Dispatches:"
