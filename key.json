@@ -1,3 +1,5 @@
 {
-  "key": "YOUR DISCORD BOT TOKEN HERE"
+  "key": "YOUR DISCORD BOT TOKEN HERE",
+  "news": "AUTO UPDATE CHANNEL ID HERE",
+  "monitor": "true"
 }
