@@ -8,3 +8,6 @@ Apart from that, `pip install -r requirements.txt` should sort you.
 - If you don't want to use automatic monitoring, set the corresponding setting to `0` in key.json.
 - If you do, leave it as is. You'll need to provide a channel id for the monitoring to take place in, in the corresponding setting in key.json.
 - You MUST insert a bot token in the corresponding setting in key.json. The bot won't work very well otherwise.
+- You also MUST add your name/website and contact details in the corresponding settings in key.json, or the API will reject you.
+
+I'm working on a inviteable bot, slowly.
