@@ -62,7 +62,8 @@ async def prio(channel):
                     content += f"{city['health']}/{city['maxHealth']} **({100 - (city['health'] * 100 / city['maxHealth'])}% liberated)**\n"
             except KeyError:
                 pass
-        content += f'\n\n*{planet["statistics"]["playerCount"]} players online*'
+            content += "\n\n"
+        content += f'\n\n*{war["statistics"]["playerCount"]} players online*'
     try:
         await channel.send(content)
     except errors.HTTPException:
@@ -75,9 +76,6 @@ async def major_order(channel):
         content = ""
         mo, mostate = await hellmonitor.fetch("/api/v1/assignments")
         briefing, brstate = await hellmonitor.fetch("/raw/api/WarSeason/801/Status")
-        if type(mo) or type(briefing) == tuple:
-            await channel.send(f"An Error occured. (Status code {briefing[1]})")
-            return
         briefing = briefing["globalEvents"]
         for event in briefing:
             briefing_title = await wrangler.sanitize(event["title"])
