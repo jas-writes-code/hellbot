@@ -1,9 +1,12 @@
 import aiohttp
 import json
 
+with open("key.json", "r") as file:
+    info = json.load(file)
+
 async def efetch(input):
     url = f"https://api.helldivers2.dev{input}"
-    headers = {"x-super-client": "virgildoesthings.com", "x-super-contact": "virgil@virgildoesthings.com"}
+    headers = {"x-super-client": info["client"], "x-super-contact": info["mail"]}
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as response:
             if response.status != 200:
@@ -28,7 +31,10 @@ async def fetch(input):
         state = 8
         item = input.split("/")[-1]
         if item not in info:
-            info[item] = {"id": stream[0]["id"]}
+            try:
+                info[item] = {"id": stream[0]["id"]}
+            except KeyError:
+                return stream
             state = 18
         if stream:
             if stream[0]["id"] != info[item]["id"]:

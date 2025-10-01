@@ -53,4 +53,3 @@ def thatstoolong(text: str, limit: int = 1900) -> list[str]:
             final_chunks.append(chunk)
 
     return final_chunks
-

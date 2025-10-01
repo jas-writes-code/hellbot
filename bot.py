@@ -1,4 +1,3 @@
-import discord
 from discord.ext import tasks
 from discord import *
 import hellmonitor, wrangler
@@ -31,16 +30,53 @@ async def monitor():
     if int(state) % 28 == 0:
         await dispatch(target)
 
-async def planets(target):
-    pass #being worked on !
+async def prio(channel):
+    async with channel.typing():
+        content = "**High-Priority planet status:**\n\n"
+        prios = []
+        war, discard = await hellmonitor.fetch("/api/v1/war")
+        if type(war) == tuple:
+            await channel.send(f"An Error occured. (Status code {war[1]})")
+            return
+        players = war["statistics"]["playerCount"]
+        planets = await hellmonitor.fetch("/api/v1/planets")
+        for planet in planets:
+            if planet["statistics"]["playerCount"] > players / 20:
+                prios.append(planet)
+        prios.sort(key=lambda p: p["statistics"]["playerCount"], reverse=True)
+        for element in prios:
+            content += f"**{element['name']}** ({element['currentOwner']})\n"
+            content += f"*{element['statistics']['playerCount']}* players active\n"
+            content += f"{element['health']}/{element['maxHealth']} **({100-(element['health']*100/element['maxHealth'])}% liberated)**\n"
+            try:
+                content += "*Megacity status:*\n"
+                for city in element['regions']:
+                    if city['isAvailable']:
+                        if city['name']:
+                            content += f"**{city['name']}** "
+                        elif not city['name']:
+                            content += f"**Unknown Megacity** "
+                        content += "(available)\n"
+                    else:
+                        content += f"(unavailable)\n"
+                    content += f"{city['health']}/{city['maxHealth']} **({100 - (city['health'] * 100 / city['maxHealth'])}% liberated)**\n"
+            except KeyError:
+                pass
+        content += f'\n\n*{planet["statistics"]["playerCount"]} players online*'
+    try:
+        await channel.send(content)
+    except errors.HTTPException:
+        messages = wrangler.thatstoolong(content)
+        for item in messages:
+            await channel.send(item)
 
 async def major_order(channel):
     async with channel.typing():
         content = ""
         mo, mostate = await hellmonitor.fetch("/api/v1/assignments")
         briefing, brstate = await hellmonitor.fetch("/raw/api/WarSeason/801/Status")
-        if mo == "Error":
-            channel.send(f"An error has occurred: {mostate}")
+        if type(mo) or type(briefing) == tuple:
+            await channel.send(f"An Error occured. (Status code {briefing[1]})")
             return
         briefing = briefing["globalEvents"]
         for event in briefing:
@@ -59,7 +95,7 @@ async def major_order(channel):
 
     try:
         await channel.send(content)
-    except discord.errors.HTTPException:
+    except errors.HTTPException:
         messages = wrangler.thatstoolong(content)
         for item in messages:
             await channel.send(item)
@@ -69,7 +105,7 @@ async def dispatch(channel):
         content = ""
         dis, distate = await hellmonitor.fetch("/api/v1/dispatches")
         if dis == "Error":
-            channel.send(f"An error has occurred: {distate}")
+            await channel.send(f"An error has occurred: {distate}")
             return
         if int(distate) % 28 == 0:
             content += "**NEW DISPATCHES:**\n\n"
@@ -83,7 +119,7 @@ async def dispatch(channel):
     content += '*Showing 5 most recent Dispatches.*'
     try:
         await channel.send(content)
-    except discord.errors.HTTPException:
+    except errors.HTTPException:
         messages = wrangler.thatstoolong(content)
         for item in messages:
             await channel.send(item)
@@ -97,7 +133,7 @@ async def on_ready():
     print('-----')
     if info["monitor"] == 1:
         print("\033[91mWARNING: Automated monitoring is enabled.\033[0m")
-        print("If you don't want this, stop the bot and set the option in key.json to false.")
+        print("If you don't want this, stop the bot and set the option in key.json to 0.")
         monitor.start()
     print("The bot works -- this terminal will not provide further feedback unless there is an error. It's safe to detatch this window.")
 
