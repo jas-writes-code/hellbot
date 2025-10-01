@@ -39,7 +39,7 @@ async def prio(channel):
             await channel.send(f"An Error occured. (Status code {war[1]})")
             return
         players = war["statistics"]["playerCount"]
-        planets = await hellmonitor.fetch("/api/v1/planets")
+        planets, discard = await hellmonitor.fetch("/api/v1/planets")
         for planet in planets:
             if planet["statistics"]["playerCount"] > players / 15:
                 prios.append(planet)
@@ -84,7 +84,7 @@ async def major_order(channel):
         for event in briefing:
             briefing_title = await wrangler.sanitize(event["title"])
             briefing_content = await wrangler.sanitize(event["message"])
-            content += f"**BRIEFING:** {briefing_title}\n\n{briefing_content}"
+            content += f"Briefing: **{briefing_title}** (*Issued <t:{1707696000 + int(event['expireTime'])}:R>*)\n\n{briefing_content}"
         if mostate == 38:
             content += f"\n\n*No currently active Major Order.*"
         for event in mo:
@@ -93,7 +93,7 @@ async def major_order(channel):
                 content += f"\n\n**NEW MAJOR ORDER:**\n\n{mo_content}"
             else:
                 content += f"\n\n**MAJOR ORDER:**\n\n{mo_content}"
-            content += f'\n\n*Expires* <t:{int(await wrangler.retime(event["expiration"]))}:R>'
+            content += f'\n\n*Expires <t:{int(await wrangler.retime(event["expiration"]))}:R>*'
 
     try:
         await channel.send(content)

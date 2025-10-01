@@ -34,7 +34,7 @@ async def fetch(input):
             try:
                 info[item] = {"id": stream[0]["id"]}
             except KeyError:
-                return stream
+                return stream, 38
             state = 18
         if stream:
             if stream[0]["id"] != info[item]["id"]:
@@ -42,7 +42,7 @@ async def fetch(input):
                 info[item]["id"] = stream[0]["id"]
         else:
             stream = ""
-            state = 38
+            state = 48
 
         with open("log.json", "w") as f:
             json.dump(info, f, indent=4)
