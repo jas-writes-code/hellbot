@@ -21,3 +21,36 @@ async def sanitize(content: str) -> str:
     content = re.sub(r"<i=1>(.*?)</i>", r"*\1*", content)
 
     return content
+
+def thatstoolong(text: str, limit: int = 1900) -> list[str]:
+    chunks = []
+    paragraphs = text.split("\n\n")  # keep paragraphs first
+
+    for para in paragraphs:
+        if len(para) <= limit:
+            # paragraph fits -> push directly
+            chunks.append(para)
+        else:
+            words = para.split(" ")
+            current = ""
+            for word in words:
+                if len(current) + len(word) + 1 > limit:
+                    chunks.append(current)
+                    current = word
+                else:
+                    current += (" " if current else "") + word
+
+            if current:
+                chunks.append(current)
+
+    # final safeguard: hard-split anything that still exceeds limit
+    final_chunks = []
+    for chunk in chunks:
+        if len(chunk) > limit:
+            for i in range(0, len(chunk), limit):
+                final_chunks.append(chunk[i:i+limit])
+        else:
+            final_chunks.append(chunk)
+
+    return final_chunks
+

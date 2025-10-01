@@ -32,7 +32,7 @@ async def fetch(input):
             state = 18
         if stream:
             if stream[0]["id"] != info[item]["id"]:
-                state = 28 * stream[0]["id"]
+                state = 28 * info[item]["id"]
                 info[item]["id"] = stream[0]["id"]
         else:
             stream = ""

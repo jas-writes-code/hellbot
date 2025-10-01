@@ -1,3 +1,4 @@
+import discord
 from discord.ext import tasks
 from discord import *
 import hellmonitor, wrangler
@@ -56,7 +57,12 @@ async def major_order(channel):
                 content += f"\n\n**MAJOR ORDER:**\n\n{mo_content}"
             content += f'\n\n*Expires* <t:{int(await wrangler.retime(event["expiration"]))}:R>'
 
-    await channel.send(content)
+    try:
+        await channel.send(content)
+    except discord.errors.HTTPException:
+        messages = wrangler.thatstoolong(content)
+        for item in messages:
+            await channel.send(item)
 
 async def dispatch(channel):
     async with channel.typing():
@@ -66,16 +72,21 @@ async def dispatch(channel):
             channel.send(f"An error has occurred: {distate}")
             return
         if int(distate) % 28 == 0:
-            content += "**NEW DISPATCHES:**"
-        elif str(distate)[0] == 1:
-            content += "No last-read detected. Most recent Dispatches:"
+            content += "**NEW DISPATCHES:**\n\n"
+        else:
+            content += "No updates since last check. Most recent Dispatches:\n\n"
         for element in dis[:5]:
-            content += f'\n-----\n*Issued* <t:{int(await wrangler.retime(element["published"]))}:R>'
-            if element["id"] < distate / 28:
-                content += " **UNREAD**"
-            content += f'\n{await wrangler.sanitize(element["message"])}'
-
-    await channel.send(content)
+            content += f'*Issued <t:{int(await wrangler.retime(element["published"]))}:R>*'
+            if element["id"] > distate / 28 and distate % 28 == 0:
+                content += "      **UNREAD**"
+            content += f'\n{await wrangler.sanitize(element["message"])}\n-----\n\n'
+    content += '*Showing 5 most recent Dispatches.*'
+    try:
+        await channel.send(content)
+    except discord.errors.HTTPException:
+        messages = wrangler.thatstoolong(content)
+        for item in messages:
+            await channel.send(item)
 
 @client.event
 async def on_ready():
@@ -84,7 +95,7 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('-----')
-    if info["monitor"]:
+    if info["monitor"] == 1:
         print("\033[91mWARNING: Automated monitoring is enabled.\033[0m")
         print("If you don't want this, stop the bot and set the option in key.json to false.")
         monitor.start()
