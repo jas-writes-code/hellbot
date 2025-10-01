@@ -41,12 +41,12 @@ async def prio(channel):
         players = war["statistics"]["playerCount"]
         planets, discard = await hellmonitor.fetch("/api/v1/planets")
         for planet in planets:
-            if planet["statistics"]["playerCount"] > players / 15:
+            if planet["statistics"]["playerCount"] > players / 21:
                 prios.append(planet)
         prios.sort(key=lambda p: p["statistics"]["playerCount"], reverse=True)
-        for element in prios:
+        for element in prios[:5]:
             content += f"**{element['name']}** ({element['currentOwner']})\n"
-            content += f"*{element['statistics']['playerCount']}* players active\n"
+            content += f"*{element['statistics']['playerCount']}* players active ({int(element['statistics']['playerCount'] * 100 / players)}% of total)\n"
             content += f"{element['health']}/{element['maxHealth']} **({100-(element['health']*100/element['maxHealth'])}% liberated)**\n"
             try:
                 content += "\n*Megacity status:*\n"

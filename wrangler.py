@@ -6,6 +6,7 @@ async def retime(iso_str):
         parts = iso_str.split('.')
         frac = parts[1].rstrip('Z')[:6]  # take first 6 digits
         iso_str_fixed = f"{parts[0]}.{frac}Z"
+        fmt = "%Y-%m-%dT%H:%M:%S.%fZ"
     else:
         iso_str_fixed = iso_str
         fmt = "%Y-%m-%dT%H:%M:%SZ"
