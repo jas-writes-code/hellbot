@@ -1,5 +1,7 @@
 {
   "key": "YOUR DISCORD BOT TOKEN HERE",
   "news": "AUTO UPDATE CHANNEL ID HERE",
-  "monitor": "true"
+  "monitor": 1,
+  "client": "YOUR GH/WEBSITE/WHATEVER HERE",
+  "mail": "YOUR EMAIL HERE"
 }
