@@ -82,5 +82,5 @@ async def mo_processing(orders):
                 content += "THIS MO TYPE IS NOT YET CONFIGURED!"
             content += "\n"
         for object in element["rewards"]:
-            content += f"Reward: {object['amount']} {config["rewards"][str(object["type"])]} | "
+            content += f"Reward: {object['amount']} {config['rewards'][str(object['type'])]} | "
     return content
