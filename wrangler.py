@@ -25,32 +25,30 @@ async def sanitize(content: str) -> str:
 
 def thatstoolong(text: str, limit: int = 1900) -> list[str]:
     chunks = []
-    paragraphs = text.split("\n\n")  # keep paragraphs first
+    remaining = text
 
-    for para in paragraphs:
-        if len(para) <= limit:
-            # paragraph fits -> push directly
-            chunks.append(para)
-        else:
-            words = para.split(" ")
-            current = ""
-            for word in words:
-                if len(current) + len(word) + 1 > limit:
-                    chunks.append(current)
-                    current = word
-                else:
-                    current += (" " if current else "") + word
+    while len(remaining) > limit:
+        # Try to split at the last double newline before limit
+        split_index = remaining.rfind("\n\n", 0, limit)
+        if split_index != -1:
+            split_index += 2  # include the "\n\n"
+            chunks.append(remaining[:split_index])
+            remaining = remaining[split_index:]
+            continue
 
-            if current:
-                chunks.append(current)
+        # If no "\n\n" found, try splitting at the last space before limit
+        split_index = remaining.rfind(" ", 0, limit)
+        if split_index != -1:
+            chunks.append(remaining[:split_index])
+            remaining = remaining[split_index + 1:]
+            continue
 
-    # final safeguard: hard-split anything that still exceeds limit
-    final_chunks = []
-    for chunk in chunks:
-        if len(chunk) > limit:
-            for i in range(0, len(chunk), limit):
-                final_chunks.append(chunk[i:i+limit])
-        else:
-            final_chunks.append(chunk)
+        # As a last resort, hard cut
+        chunks.append(remaining[:limit])
+        remaining = remaining[limit:]
 
-    return final_chunks
+    # Add whatever is left
+    if remaining:
+        chunks.append(remaining)
+
+    return chunks
