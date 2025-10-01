@@ -85,7 +85,7 @@ async def major_order(channel):
             briefing_title = await wrangler.sanitize(event["title"])
             briefing_content = await wrangler.sanitize(event["message"])
             content += f"Briefing: **{briefing_title}** (*Issued <t:{1707696000 + int(event['expireTime'])}:R>*)\n\n{briefing_content}"
-        if mostate == 38:
+        if mostate == 48:
             content += f"\n\n*No currently active Major Order.*"
         for event in mo:
             mo_content = await wrangler.sanitize(event["briefing"])
