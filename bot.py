@@ -41,7 +41,7 @@ async def prio(channel):
         players = war["statistics"]["playerCount"]
         planets = await hellmonitor.fetch("/api/v1/planets")
         for planet in planets:
-            if planet["statistics"]["playerCount"] > players / 20:
+            if planet["statistics"]["playerCount"] > players / 15:
                 prios.append(planet)
         prios.sort(key=lambda p: p["statistics"]["playerCount"], reverse=True)
         for element in prios:
@@ -49,21 +49,25 @@ async def prio(channel):
             content += f"*{element['statistics']['playerCount']}* players active\n"
             content += f"{element['health']}/{element['maxHealth']} **({100-(element['health']*100/element['maxHealth'])}% liberated)**\n"
             try:
-                content += "*Megacity status:*\n"
+                content += "\n*Megacity status:*\n"
                 for city in element['regions']:
                     if city['isAvailable']:
                         if city['name']:
                             content += f"**{city['name']}** "
                         elif not city['name']:
-                            content += f"**Unknown Megacity** "
-                        content += "(available)\n"
+                            content += f"*Unknown Megacity* "
+                        content += f"(available since {100 - (city['availabilityFactor'] * 100)}% -- {city['players']} players)\n"
                     else:
-                        content += f"(unavailable)\n"
+                        if city['name']:
+                            content += f"**{city['name']}** "
+                        elif not city['name']:
+                            content += f"*Unknown Megacity* "
+                        content += f"(unavailable; unlocks at {100 - (city['availabilityFactor'] * 100)}%)\n"
                     content += f"{city['health']}/{city['maxHealth']} **({100 - (city['health'] * 100 / city['maxHealth'])}% liberated)**\n"
             except KeyError:
                 pass
             content += "\n\n"
-        content += f'\n\n*{war["statistics"]["playerCount"]} players online*'
+        content += f'*{war["statistics"]["playerCount"]} players online*'
     try:
         await channel.send(content)
     except errors.HTTPException:
