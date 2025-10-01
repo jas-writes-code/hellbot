@@ -1,5 +1,9 @@
 import re
 from datetime import datetime, timezone
+import json
+
+with open('config.json', 'r') as f:
+    config = json.load(f)
 
 async def retime(iso_str):
     if '.' in iso_str:
@@ -52,3 +56,31 @@ def thatstoolong(text: str, limit: int = 1900) -> list[str]:
         chunks.append(remaining)
 
     return chunks
+
+async def mo_processing(orders):
+    content = ""
+    for element in orders:
+        for object in element["tasks"]:
+            objective = str(object["type"])
+            content += f'{config["tasks"][objective]} '
+            if objective == "2": # extract samples?
+                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
+            elif objective == "3": # cull
+                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
+            elif objective == "7": # complete missions
+                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
+            elif objective == "9": # complete operations
+                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
+            elif objective == "11": # liberate
+                content += config[str(config["types"][str(object["valueTypes"][2])])][str(object["values"][2])]["name"]
+                content += f' ({element["progress"][element["tasks"].index(object)]}%)'
+            elif objective == "12": # hold/defend
+                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
+            elif objective == "13":
+                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
+            elif objective == "15":
+                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
+            content += "\n"
+        for object in element["rewards"]:
+            content += f"Reward: {object['amount']} {config["rewards"][str(object["type"])]} | "
+    return content

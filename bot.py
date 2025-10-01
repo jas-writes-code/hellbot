@@ -92,8 +92,9 @@ async def major_order(channel):
             if int(mostate) % 28 == 0:
                 content += f"\n\n**NEW MAJOR ORDER:**\n\n{mo_content}"
             else:
-                content += f"\n\n**MAJOR ORDER:**\n\n{mo_content}"
-            content += f'\n\n*Expires <t:{int(await wrangler.retime(event["expiration"]))}:R>*'
+                content += f"\n\n**MAJOR ORDER:**\n\n{mo_content}\n\n"
+            content += await wrangler.mo_processing(mo)
+            content += f'*Expires <t:{int(await wrangler.retime(event["expiration"]))}:R>*'
 
     try:
         await channel.send(content)
