@@ -31,7 +31,7 @@ async def monitor():
         await dispatch(target)
 
 async def prio(channel):
-    async with channel.typing():
+    async with (channel.typing()):
         content = "**High-Priority planet status:**\n\n"
         prios = []
         war, discard = await hellmonitor.fetch("/api/v1/war")
@@ -47,23 +47,31 @@ async def prio(channel):
         for element in prios[:5]:
             content += f"**{element['name']}** ({element['currentOwner']})\n"
             content += f"*{element['statistics']['playerCount']}* players active ({int(element['statistics']['playerCount'] * 100 / players)}% of total)\n"
-            content += f"{element['health']}/{element['maxHealth']} **({100-(element['health']*100/element['maxHealth'])}% liberated)**\n"
+            content += f"{element['health']}/{element['maxHealth']}"
+            if element['currentOwner'] == "Humans":
+                content += f" **({(element['health']*100/element['maxHealth'])}% liberated)**\n"
+            else:
+                content += f" **({100-(element['health']*100/element['maxHealth'])}% liberated)**\n"
             try:
-                content += "\n*Megacity status:*\n"
+                content += "\n*Megacity status:*"
                 for city in element['regions']:
                     if city['isAvailable']:
                         if city['name']:
-                            content += f"**{city['name']}** "
+                            content += f"\n**{city['name']}** "
                         elif not city['name']:
-                            content += f"*Unknown Megacity* "
-                        content += f"(available since {100 - (city['availabilityFactor'] * 100)}% -- {city['players']} players)\n"
+                            content += f"\n*Unknown Megacity* "
+                        if city['availabilityFactor']:
+                            content += f"(available since {100 - (city['availabilityFactor'] * 100)}% -- {city['players']} players)"
                     else:
                         if city['name']:
-                            content += f"**{city['name']}** "
+                            content += f"\n**{city['name']}** "
                         elif not city['name']:
-                            content += f"*Unknown Megacity* "
-                        content += f"(unavailable; unlocks at {100 - (city['availabilityFactor'] * 100)}%)\n"
-                    content += f"{city['health']}/{city['maxHealth']} **({100 - (city['health'] * 100 / city['maxHealth'])}% liberated)**\n"
+                            content += f"\n*Unknown Megacity* "
+                        if city['availabilityFactor']:
+                            content += f"(unavailable; unlocks at {100 - (city['availabilityFactor'] * 100)}%)"
+                    if not city['health']:
+                        city['health'] = 0
+                    content += f"\n{city['health']}/{city['maxHealth']} **({100 - (city['health'] * 100 / city['maxHealth'])}% liberated)**"
             except KeyError:
                 pass
             content += "\n\n"
