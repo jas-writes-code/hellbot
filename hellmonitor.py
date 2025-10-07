@@ -14,7 +14,7 @@ async def efetch(input):
             data = await response.json()
             return data
 
-async def fetch(input):
+async def fetch(input, update):
     with open('log.json', 'r') as f:
         try:
             info = json.load(f)
@@ -43,9 +43,9 @@ async def fetch(input):
         else:
             stream = ""
             state = 48
-
-        with open("log.json", "w") as f:
-            json.dump(info, f, indent=4)
+        if update:
+            with open("log.json", "w") as f:
+                json.dump(info, f, indent=4)
         return stream, state
     else:
         return stream, 0
