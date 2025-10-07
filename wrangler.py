@@ -73,11 +73,20 @@ async def mo_processing(orders):
                 content += "THIS MO TYPE IS NOT YET CONFIGURED!"
             elif objective == "11": # liberate
                 content += config[str(config["types"][str(object["valueTypes"][2])])][str(object["values"][2])]["name"]
-                content += f' ({element["progress"][element["tasks"].index(object)]}%)'
+                if element["progress"][element["tasks"].index(object)] == 1:
+                    content += " (:green_circle:)"
+                else:
+                    content += " (:red_circle:)"
+
             elif objective == "12": # hold/defend
                 content += "THIS MO TYPE IS NOT YET CONFIGURED!"
             elif objective == "13":
-                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
+                content += config[str(config["types"][str(object["valueTypes"][2])])][str(object["values"][2])]["name"]
+                if element["progress"][element["tasks"].index(object)] == 1:
+                    content += " (:green_circle:)"
+                else:
+                    content += " (:red_circle:)"
+
             elif objective == "15":
                 content += "THIS MO TYPE IS NOT YET CONFIGURED!"
             content += "\n"
