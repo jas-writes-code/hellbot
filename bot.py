@@ -13,7 +13,7 @@ error_message = None
 async def monitor():
     global error_message
     target = client.get_channel(int(info["news"]))
-    test, state = await hellmonitor.fetch("/api/v1/assignments")
+    test, state = await hellmonitor.fetch("/api/v1/assignments", False)
     if test == "Error":
         if error_message:
             await error_message.delete()
@@ -21,7 +21,7 @@ async def monitor():
         return
     if int(state) % 28 == 0:
         await major_order(target)
-    test, state = await hellmonitor.fetch("/api/v1/dispatches")
+    test, state = await hellmonitor.fetch("/api/v1/dispatches", False)
     if test == "Error":
         if error_message:
             await error_message.delete()
@@ -34,12 +34,12 @@ async def prio(channel):
     async with (channel.typing()):
         content = "**High-Priority planet status:**\n\n"
         prios = []
-        war, discard = await hellmonitor.fetch("/api/v1/war")
+        war, discard = await hellmonitor.fetch("/api/v1/war", False)
         if type(war) == tuple:
             await channel.send(f"An Error occured. (Status code {war[1]})")
             return
         players = war["statistics"]["playerCount"]
-        planets, discard = await hellmonitor.fetch("/api/v1/planets")
+        planets, discard = await hellmonitor.fetch("/api/v1/planets", False)
         for planet in planets:
             if planet["statistics"]["playerCount"] > players / 21:
                 prios.append(planet)
@@ -86,8 +86,8 @@ async def prio(channel):
 async def major_order(channel):
     async with channel.typing():
         content = ""
-        mo, mostate = await hellmonitor.fetch("/api/v1/assignments")
-        briefing, brstate = await hellmonitor.fetch("/raw/api/WarSeason/801/Status")
+        mo, mostate = await hellmonitor.fetch("/api/v1/assignments", True)
+        briefing, brstate = await hellmonitor.fetch("/raw/api/WarSeason/801/Status", True)
         briefing = briefing["globalEvents"]
         for event in briefing:
             briefing_title = await wrangler.sanitize(event["title"])
@@ -114,7 +114,7 @@ async def major_order(channel):
 async def dispatch(channel):
     async with channel.typing():
         content = ""
-        dis, distate = await hellmonitor.fetch("/api/v1/dispatches")
+        dis, distate = await hellmonitor.fetch("/api/v1/dispatches", True)
         if dis == "Error":
             await channel.send(f"An error has occurred: {distate}")
             return
