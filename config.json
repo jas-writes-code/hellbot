@@ -1,5 +1,5 @@
 {
-  "tmo": {
+  "mo": {
     "description": "Fetches the latest Major Order(s) and Briefing(s)",
     "action": "major_order"
   },
@@ -7,7 +7,7 @@
     "description": "Fetches the latest dispatches.",
     "action": "dispatch"
   },
-  "tprio": {
+  "prio": {
     "description": "Displays the status of high-priority planets.",
     "action": "prio"
   },
