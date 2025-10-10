@@ -82,6 +82,7 @@ async def mo_processing(orders):
                 content += "THIS MO TYPE IS NOT YET CONFIGURED!"
             elif objective == "13":
                 content += config[str(config["types"][str(object["valueTypes"][2])])][str(object["values"][2])]["name"]
+                content += " when the order expires."
                 if element["progress"][element["tasks"].index(object)] == 1:
                     content += " (:green_circle:)"
                 else:
