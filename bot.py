@@ -1,3 +1,4 @@
+import time
 from discord.ext import tasks
 from discord import *
 import hellmonitor, wrangler
@@ -9,7 +10,7 @@ with open("key.json", "r") as file:
 key = info["key"]
 error_message = None
 
-@tasks.loop(minutes=1)
+@tasks.loop(seconds=60)
 async def monitor():
     global error_message
     target = client.get_channel(int(info["news"]))
@@ -84,7 +85,7 @@ async def prio(channel):
             await channel.send(item)
 
 async def major_order(channel):
-    async with channel.typing():
+    async with (channel.typing()):
         content = ""
         mo, mostate = await hellmonitor.fetch("/api/v1/assignments", True)
         briefing, brstate = await hellmonitor.fetch("/raw/api/WarSeason/801/Status", True)
@@ -92,7 +93,11 @@ async def major_order(channel):
         for event in briefing:
             briefing_title = await wrangler.sanitize(event["title"])
             briefing_content = await wrangler.sanitize(event["message"])
-            content += f"\n\nBriefing: **{briefing_title}** (*Due <t:{1707696000 + int(event['expireTime'])}:R>*)\n\n{briefing_content}"
+            content += f"\n\n**{briefing_title}**"
+            if event['expireTime'] > int(time.time()):
+                content += "f(*Expires <t:{1707696000 + int(event['expireTime'])}:R>*)\n\n{briefing_content}"
+            else:
+                content += "f(*Issued <t:{1707696000 + int(event['expireTime'])}:R>*)\n\n{briefing_content}"
         if mostate == 48:
             content += f"\n\n*No currently active Major Order.*"
         for event in mo:
