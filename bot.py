@@ -72,7 +72,8 @@ async def prio(channel):
             else:
                 content += f" **({100-(element['health']*100/element['maxHealth'])}% liberated)**\n"
             try:
-                content += "\n*Megacity status:*"
+                if len(element['regions']) > 0:
+                    content += "\n*Megacity status:*"
                 for city in element['regions']:
                     if city['isAvailable']:
                         if city['name']:
