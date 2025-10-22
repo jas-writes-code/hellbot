@@ -9,6 +9,7 @@ with open("key.json", "r") as file:
     info = json.load(file)
 key = info["key"]
 error_message = None
+basetime = 1707760800 # used for briefings and things
 
 @tasks.loop(seconds=60)
 async def monitor():
@@ -41,6 +42,7 @@ async def prio(channel):
             return
         players = war["statistics"]["playerCount"]
         planets, discard = await hellmonitor.fetch("/api/v1/planets", False)
+        defcam, status = await hellmonitor.fetch("/api/v1/planet-events", False)
         for planet in planets:
             if planet["statistics"]["playerCount"] > players / 21:
                 prios.append(planet)
@@ -49,8 +51,24 @@ async def prio(channel):
             content += f"**{element['name']}** ({element['currentOwner']})\n"
             content += f"*{element['statistics']['playerCount']}* players active ({int(element['statistics']['playerCount'] * 100 / players)}% of total)\n"
             content += f"{element['health']}/{element['maxHealth']}"
-            if element['currentOwner'] == "Humans":
-                content += f" **({(element['health']*100/element['maxHealth'])}% liberated)**\n"
+            if element['currentOwner'] == "Humans": # check for a active defense campaign, or mark the planet as liberated
+                if type(defcam) == tuple:
+                    await channel.send(f"An Error occured. (Status code {defcam[1]})")
+                    continue
+                else:
+                    if status == 48: # if no defenses are active, continue as before
+                        content += f" **({(element['health'] * 100 / element['maxHealth'])}% liberated)**\n"
+                    else:
+                        for campaign in defcam:
+                            if campaign['index'] == element['index']:
+                                content += f"\n**Active Defense:**"
+                                start = int(await wrangler.retime(campaign['event']['startTime']))
+                                end = int(await wrangler.retime(campaign['event']['endTime']))
+                                duration = end - start
+                                content += f" Expires <t:{end}:R> ({100 * (int(time.time()) - start) / duration}%)"
+                                content += f"\n**Progress**: {100 - campaign['event']['health']*100/campaign['event']['maxHealth']}%"
+                            else: # if it's not a defense campaign, continue as before
+                                content += f" **({(element['health']*100/element['maxHealth'])}% liberated)**\n"
             else:
                 content += f" **({100-(element['health']*100/element['maxHealth'])}% liberated)**\n"
             try:
@@ -94,10 +112,10 @@ async def major_order(channel):
             briefing_title = await wrangler.sanitize(event["title"])
             briefing_content = await wrangler.sanitize(event["message"])
             content += f"\n\n**{briefing_title}**"
-            if event['expireTime'] > int(time.time()):
-                content += f"(*Expires <t:{1707696000 + int(event['expireTime'])}:R>*)\n\n{briefing_content}"
+            if basetime + event['expireTime'] > int(time.time()):
+                content += f" (*Expires <t:{basetime + int(event['expireTime'])}:R>*)\n\n{briefing_content}"
             else:
-                content += f"(*Issued <t:{1707696000 + int(event['expireTime'])}:R>*)\n\n{briefing_content}"
+                content += f" (*Issued <t:{basetime + int(event['expireTime'])}:R>*)\n\n{briefing_content}"
         if mostate == 48:
             content += f"\n\n*No currently active Major Order.*"
         for event in mo:

@@ -37,9 +37,12 @@ async def fetch(input, update):
                 return stream, 38
             state = 18
         if stream:
-            if stream[0]["id"] != info[item]["id"]:
-                state = 28 * info[item]["id"]
-                info[item]["id"] = stream[0]["id"]
+            try:
+                if stream[0]["id"] != info[item]["id"]:
+                    state = 28 * info[item]["id"]
+                    info[item]["id"] = stream[0]["id"]
+            except KeyError:
+                pass
         else:
             stream = ""
             state = 48
