@@ -25,6 +25,9 @@
 	"13": "Hold",
 	"15": "Expand"
 },
+	"enemies": {
+		"0": "Enemies"
+	},
   "types": {
     "1": "race",
     "2": "unknown",
