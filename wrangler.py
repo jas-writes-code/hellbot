@@ -66,7 +66,15 @@ async def mo_processing(orders):
             if objective == "2": # extract samples?
                 content += "THIS MO TYPE IS NOT YET CONFIGURED!"
             elif objective == "3": # cull
-                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
+
+                #lay out some variables to make the logic easier
+                progress = element['progress'][element["tasks"].index(object)]
+                planet = config[str(config['types'][str(object['valueTypes'][9])])][str(object['values'][9])]['name']
+
+                content += f"{object['values'][2]} {config['enemies'][str(object['values'][0])]}"
+                if object['values'][9] > 0:
+                    content += f" on {planet}"
+                content += f"\n*Progress: {progress}/{object['values'][2]} ({progress*100/object['values'][2]}%)*"
             elif objective == "7": # complete missions
                 content += "THIS MO TYPE IS NOT YET CONFIGURED!"
             elif objective == "9": # complete operations
@@ -78,9 +86,9 @@ async def mo_processing(orders):
                 else:
                     content += " (:red_circle:)"
 
-            elif objective == "12": # hold/defend
+            elif objective == "12": # defend
                 content += "THIS MO TYPE IS NOT YET CONFIGURED!"
-            elif objective == "13":
+            elif objective == "13": # hold
                 content += config[str(config["types"][str(object["valueTypes"][2])])][str(object["values"][2])]["name"]
                 content += " when the order expires."
                 if element["progress"][element["tasks"].index(object)] == 1:

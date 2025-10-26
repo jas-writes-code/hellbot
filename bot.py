@@ -88,7 +88,10 @@ async def prio(channel):
                         elif not city['name']:
                             content += f"\n*Unknown Megacity* "
                         if city['availabilityFactor']:
-                            content += f"(unavailable; unlocks at {100 - (city['availabilityFactor'] * 100)}%)"
+                            if 100-(city['availabilityFactor']*100) < (element['health']*100/element['maxHealth']):
+                                content += f"(completed; unlocked at {100 - (city['availabilityFactor'] * 100)}%)"
+                            else:
+                                content += f"(unavailable; unlocks at {100 - (city['availabilityFactor'] * 100)}%)"
                     if not city['health']:
                         city['health'] = 0
                     content += f"\n{city['health']}/{city['maxHealth']} **({100 - (city['health'] * 100 / city['maxHealth'])}% liberated)**"
@@ -122,9 +125,9 @@ async def major_order(channel):
         for event in mo:
             mo_content = await wrangler.sanitize(event["briefing"])
             if int(mostate) % 28 == 0:
-                content += f"\n\n**NEW MAJOR ORDER:**\n\n{mo_content}"
+                content += f"\n\n**NEW {event['title']}:**\n\n{mo_content}"
             else:
-                content += f"\n\n**MAJOR ORDER:**\n\n{mo_content}\n\n"
+                content += f"\n\n**{event['title']}:**\n\n{mo_content}\n\n"
             content += await wrangler.mo_processing(mo)
             content += f'*Expires <t:{int(await wrangler.retime(event["expiration"]))}:R>*'
 
