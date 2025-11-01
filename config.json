@@ -1,13 +1,13 @@
 {
-  "mo": {
+  "tmo": {
     "description": "Fetches the latest Major Order(s) and Briefing(s)",
     "action": "major_order"
   },
-  "dispatch": {
+  "tdispatch": {
     "description": "Fetches the latest dispatches.",
     "action": "dispatch"
   },
-  "prio": {
+  "tprio": {
     "description": "Displays the status of high-priority planets.",
     "action": "prio"
   },
@@ -26,7 +26,8 @@
 	"15": "Expand"
 },
 	"enemies": {
-		"0": "Enemies"
+		"0": "Enemies",
+        "2": "Hive Lords"
 	},
   "types": {
     "1": "race",
