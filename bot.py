@@ -1,7 +1,7 @@
 import time
 from discord.ext import tasks
 from discord import *
-import hellmonitor, wrangler
+import hellmonitor, wrangler, info
 import json
 
 client = Client(intents=Intents.all())
@@ -67,36 +67,15 @@ async def prio(channel):
                                 duration = end - start
                                 content += f" Expires <t:{end}:R> ({100 * (int(time.time()) - start) / duration}%)"
                                 content += f"\n**Progress**: {100 - campaign['event']['health']*100/campaign['event']['maxHealth']}%"
+                                content += f" (Invasion level {int(campaign['event']['maxHealth'] / 50000)})"
                             else: # if it's not a defense campaign, continue as before
                                 content += f" **({(element['health']*100/element['maxHealth'])}% liberated)**\n"
             else:
                 content += f" **({100-(element['health']*100/element['maxHealth'])}% liberated)**\n"
-            try:
-                if len(element['regions']) > 0:
-                    content += "\n*Megacity status:*"
-                for city in element['regions']:
-                    if city['isAvailable']:
-                        if city['name']:
-                            content += f"\n**{city['name']}** "
-                        elif not city['name']:
-                            content += f"\n*Unknown Megacity* "
-                        if city['availabilityFactor']:
-                            content += f"(available since {100 - (city['availabilityFactor'] * 100)}% -- {city['players']} players)"
-                    else:
-                        if city['name']:
-                            content += f"\n**{city['name']}** "
-                        elif not city['name']:
-                            content += f"\n*Unknown Megacity* "
-                        if city['availabilityFactor']:
-                            if 100-(city['availabilityFactor']*100) < (element['health']*100/element['maxHealth']):
-                                content += f"(completed; unlocked at {100 - (city['availabilityFactor'] * 100)}%)"
-                            else:
-                                content += f"(unavailable; unlocks at {100 - (city['availabilityFactor'] * 100)}%)"
-                    if not city['health']:
-                        city['health'] = 0
-                    content += f"\n{city['health']}/{city['maxHealth']} **({100 - (city['health'] * 100 / city['maxHealth'])}% liberated)**"
-            except KeyError:
-                pass
+            if len(element['regions']) > 0:
+                content += "\n*Megacity status:*"
+                cities = await wrangler.megacities(element)
+                content += cities
             content += "\n\n"
         content += f'*{war["statistics"]["playerCount"]} players online*'
     try:

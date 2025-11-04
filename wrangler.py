@@ -1,6 +1,7 @@
 import re
 from datetime import datetime, timezone
 import json
+from info import info
 
 with open('config.json', 'r') as f:
     config = json.load(f)
@@ -63,42 +64,58 @@ async def mo_processing(orders):
         for object in element["tasks"]:
             objective = str(object["type"])
             content += f'{config["tasks"][objective]} '
-            if objective == "2": # extract samples?
-                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
-            elif objective == "3": # cull
+            for value in object["valueTypes"]:
+                if value == "3":
+                    content += f" {object['values'][str(object['valueTypes'].index(value))]}"
+                if value == "1":
+                    content += f" {config['race'][str(object['values'].index(value))]}"
+                if value == "2":
+                    content += f" {config['enemies'][str(object['values'].index(value))]}"
+                if value == "12":
+                    content += "on" if objective != "11" else ""
+                    content += f" {info.planets.planets[str(object['values'].index(value))]['name']}"
+                if value == "5":
+                    content += f" using {info.items.item_names[str(object['values'].index(object['valueTypes'][value]))]['name']}"
 
-                #lay out some variables to make the logic easier
-                progress = element['progress'][element["tasks"].index(object)]
-                planet = config[str(config['types'][str(object['valueTypes'][9])])][str(object['values'][9])]['name']
 
-                content += f"{object['values'][2]} {config['enemies'][str(object['values'][0])]}"
-                if object['values'][9] > 0:
-                    content += f" on {planet}"
-                content += f"\n*Progress: {progress}/{object['values'][2]} ({progress*100/object['values'][2]}%)*"
-            elif objective == "7": # complete missions
-                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
-            elif objective == "9": # complete operations
-                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
-            elif objective == "11": # liberate
-                content += config[str(config["types"][str(object["valueTypes"][2])])][str(object["values"][2])]["name"]
-                if element["progress"][element["tasks"].index(object)] == 1:
-                    content += " (:green_circle:)"
-                else:
-                    content += " (:red_circle:)"
-
-            elif objective == "12": # defend
-                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
-            elif objective == "13": # hold
-                content += config[str(config["types"][str(object["valueTypes"][2])])][str(object["values"][2])]["name"]
-                content += " when the order expires."
-                if element["progress"][element["tasks"].index(object)] == 1:
-                    content += " (:green_circle:)"
-                else:
-                    content += " (:red_circle:)"
-
-            elif objective == "15":
-                content += "THIS MO TYPE IS NOT YET CONFIGURED!"
-            content += "\n"
         for object in element["rewards"]:
             content += f"Reward: {object['amount']} {config['rewards'][str(object['type'])]} | "
+
+    return content
+
+
+
+async def megacities(planet):
+    content = ""
+    for city in planet['regions']:
+        name = city.get('name') or "*Unknown Megacity*"
+        available = city.get('isAvailable', False)
+        health = city.get('health', 0)
+        max_health = city.get('maxHealth', 1)
+        phealth = planet.get('health', 0)
+        pmhealth = planet.get('maxHealth', 1)
+        avail_factor = city.get('availabilityFactor', 1)
+        players = city.get('players', 0)
+
+        degree = phealth / pmhealth
+
+        # City availability string
+        # Calculate liberation percentage for display
+        lib_percent = (health * 100 / max_health)
+
+        status = ""
+        # Determine city state
+        if available:
+            status = f"(available since {100 - (avail_factor * 100):.1f}% -- {players} players)"
+        elif health < max_health and 1 - avail_factor > degree:
+            # City unavailable
+            status = f"(unavailable; unlocks at {100 - (avail_factor * 100):.1f}%)"
+        elif health >= max_health and 1 - avail_factor <= degree:
+            # City liberated
+            status = f"(liberated; unlocked at {100 - (avail_factor * 100):.1f}%)"
+
+        # Display city information
+        content += f"\n**{name}** {status}"
+        content += f"\n{health}/{max_health} **({lib_percent:.1f}% liberated)**"
+
     return content
