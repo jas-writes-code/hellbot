@@ -97,22 +97,24 @@ async def megacities(planet):
         avail_factor = city.get('availabilityFactor', 1)
         players = city.get('players', 0)
 
-        degree = phealth / pmhealth
+        degree = 1 - (phealth / pmhealth)
 
         # City availability string
         # Calculate liberation percentage for display
         lib_percent = (health * 100 / max_health)
+        print(lib_percent, degree, avail_factor)
 
         status = ""
         # Determine city state
         if available:
             status = f"(available since {100 - (avail_factor * 100):.1f}% -- {players} players)"
-        elif health < max_health and 1 - avail_factor > degree:
-            # City unavailable
-            status = f"(unavailable; unlocks at {100 - (avail_factor * 100):.1f}%)"
-        elif health >= max_health and 1 - avail_factor <= degree:
+        elif health == max_health and avail_factor <= degree:
             # City liberated
             status = f"(liberated; unlocked at {100 - (avail_factor * 100):.1f}%)"
+        elif health == max_health and avail_factor > degree:
+            # City unavailable
+            status = f"(unavailable; unlocks at {100 - (avail_factor * 100):.1f}%)"
+        else: status = "locked"
 
         # Display city information
         content += f"\n**{name}** {status}"
