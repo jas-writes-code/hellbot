@@ -1,5 +1,6 @@
 import re
 from datetime import datetime, timezone
+
 import json
 from info import info
 
@@ -63,22 +64,33 @@ async def mo_processing(orders):
     for element in orders:
         for object in element["tasks"]:
             objective = str(object["type"])
+            content += "\n"
             content += f'{config["tasks"][objective]} '
+            amnt = 0
             for value in object["valueTypes"]:
-                if value == "3":
-                    content += f" {object['values'][str(object['valueTypes'].index(value))]}"
-                if value == "1":
-                    content += f" {config['race'][str(object['values'].index(value))]}"
-                if value == "2":
-                    content += f" {config['enemies'][str(object['values'].index(value))]}"
-                if value == "12":
-                    content += "on" if objective != "11" else ""
-                    content += f" {info.planets.planets[str(object['values'].index(value))]['name']}"
-                if value == "5":
-                    content += f" using {info.items.item_names[str(object['values'].index(object['valueTypes'][value]))]['name']}"
+                if value == 3:
+                    amnt = object['values'][int(object['values'][object['valueTypes'].index(value)])]
+                    if amnt > 1:
+                        content += f" {amnt}"
+                if value == 1:
+                    content += f" {config['race'][str(object['values'][object['valueTypes'].index(value)])]}"
+                if value == 2:
+                    content += f" {config['enemies'][str(object['values'][object['valueTypes'].index(value)])]}"
+                if value == 12:
+                    content += f"{info.planets.planets[str(object['values'][object['valueTypes'].index(value)])]['name']}"
+                if value == 5:
+                    content += f" using {info.items.item_names[str(object['values'][object['valueTypes'].index(value)])]['name']}"
 
+            ind_prog = element["progress"][element["tasks"].index(object)]
+            if ind_prog == 1:
+                content += " (:green_circle:)"
+            if ind_prog == 0:
+                content += " (:red_circle:)"
+            elif ind_prog > 1:
+                content += f" {ind_prog * 100 / amnt}%({ind_prog}/{amnt})"
 
         for object in element["rewards"]:
+            content += "\n\n"
             content += f"Reward: {object['amount']} {config['rewards'][str(object['type'])]} | "
 
     return content

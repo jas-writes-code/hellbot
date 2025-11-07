@@ -23,14 +23,13 @@ with open("key.json", "r") as file:
 def fetch(input):
     response = requests.get(f"https://api.helldivers2.dev{input}", headers={"x-super-client": info["client"], "x-super-contact": info["mail"]})
 
-    print("currently disabled")
-'''    data = response.json()
+    data = response.json()
     print(data)
     times = []
     for element in data:
         times += int(retime(element["published"]))
-    times.sort(key=lambda p: p["published"])'''
+    times.sort(key=lambda p: p["published"])
 
 
 
-fetch("/api/v1/dispatches")
+fetch("/api/v1/assignments")
