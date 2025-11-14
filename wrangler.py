@@ -61,44 +61,44 @@ def thatstoolong(text: str, limit: int = 1900) -> list[str]:
 
 async def mo_processing(orders):
     content = ""
-    for element in orders:
-        for object in element["tasks"]:
-            objective = str(object["type"])
-            content += "\n"
-            content += f'{config["tasks"][objective]}'
-            amnt = 0
-            for value in object["valueTypes"]:
-                if value == 3:
-                    amnt = object['values'][int(object['valueTypes'].index(value))]
-                    if amnt > 1:
-                        content += f" {amnt}"
-                if value == 1:
-                    content += f" {config['race'][str(object['values'][object['valueTypes'].index(value)])]}"
-                if value == 2:
-                    if objective == 3:
-                        content += f" {config['enemies'][str(object['values'][object['valueTypes'].index(value)])]}"
-                if value == 12:
-                    if objective == 3:
-                        content += " on"
-                    planet = info.planets.planets[str(object['values'][object['valueTypes'].index(value)])]["name"]
-                    if planet != "Super Earth":
-                        content += f" {planet}"
-                if value == 5:
-                    if objective == 3:
-                        content += " using"
-                    content += f" {info.items.item_names[str(object['values'][object['valueTypes'].index(value)])]['name']}"
+    element = orders
+    for object in element["tasks"]:
+        objective = str(object["type"])
+        content += "\n"
+        content += f'{config["tasks"][objective]}'
+        amnt = 0
+        for value in object["valueTypes"]:
+            if value == 3:
+                amnt = object['values'][int(object['valueTypes'].index(value))]
+                if amnt > 1:
+                    content += f" {amnt}"
+            if value == 1:
+                content += f" {config['race'][str(object['values'][object['valueTypes'].index(value)])]}"
+            if value == 2:
+                if objective == 3:
+                    content += f" {config['enemies'][str(object['values'][object['valueTypes'].index(value)])]}"
+            if value == 12:
+                if objective == 3:
+                    content += " on"
+                planet = info.planets.planets[str(object['values'][object['valueTypes'].index(value)])]["name"]
+                if planet != "Super Earth":
+                    content += f" {planet}"
+            if value == 5:
+                if objective == 3:
+                    content += " using"
+                content += f" {info.items.item_names[str(object['values'][object['valueTypes'].index(value)])]['name']}"
 
-            ind_prog = element["progress"][element["tasks"].index(object)]
-            if ind_prog == 1:
-                content += " (:green_circle:)"
-            if ind_prog == 0:
-                content += " (:red_circle:)"
-            elif ind_prog > 1:
-                content += f" \n*{ind_prog * 100 / amnt}% ({ind_prog}/{amnt})*"
+        ind_prog = element["progress"][element["tasks"].index(object)]
+        if ind_prog == 1:
+            content += " (:green_circle:)"
+        if ind_prog == 0:
+            content += " (:red_circle:)"
+        elif ind_prog > 1:
+            content += f" \n*{ind_prog * 100 / amnt}% ({ind_prog}/{amnt})*"
 
-        for object in element["rewards"]:
-            content += "\n\n"
-            content += f"Reward: {object['amount']} {config['rewards'][str(object['type'])]} | "
+    for object in element["rewards"]:
+        content += "\n\n"
+        content += f"Reward: {object['amount']} {config['rewards'][str(object['type'])]} | "
 
     return content
 

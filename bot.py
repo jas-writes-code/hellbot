@@ -107,7 +107,7 @@ async def major_order(channel):
                 content += f"\n\n**NEW {event['title']}:**\n\n{mo_content}"
             else:
                 content += f"\n\n**{event['title']}:**\n\n{mo_content}\n\n"
-            content += await wrangler.mo_processing(mo)
+            content += await wrangler.mo_processing(event)
             content += f'*Expires <t:{int(await wrangler.retime(event["expiration"]))}:R>*'
 
     try:
