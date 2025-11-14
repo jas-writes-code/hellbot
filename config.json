@@ -1,13 +1,13 @@
 {
-  "mo": {
+  "tmo": {
     "description": "Fetches the latest Major Order(s) and Briefing(s)",
     "action": "major_order"
   },
-  "dispatch": {
+  "tdispatch": {
     "description": "Fetches the latest dispatches.",
     "action": "dispatch"
   },
-  "prio": {
+  "tprio": {
     "description": "Displays the status of high-priority planets.",
     "action": "prio"
   },
@@ -27,7 +27,9 @@
 },
 	"enemies": {
 		"0": "Enemies",
-        "2": "Hive Lords"
+        "2": "Hive Lords",
+        "3": "Automaton",
+        "4": "Illuminate"
 	},
   "types": {
     "1": "race",
@@ -40,8 +42,8 @@
     "12": "planets"
   },
   "race": {
-  "0": "Enemies",
-  "1": "Automatons",
+  "1": "Enemies",
+  "3": "Automatons",
   "2": "Terminids",
-  "3": "Illuminate"}
+  "4": "Illuminate"}
 }
