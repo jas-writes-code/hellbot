@@ -42,8 +42,9 @@
     "12": "planets"
   },
   "race": {
-  "1": "Enemies",
-  "3": "Automatons",
-  "2": "Terminids",
-  "4": "Illuminate"}
+    "0": "all Enemies",
+    "1": "Enemies",
+    "3": "Automatons",
+    "2": "Terminids",
+    "4": "Illuminate"}
 }

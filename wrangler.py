@@ -73,6 +73,8 @@ async def mo_processing(orders):
                 if amnt > 1:
                     content += f" {amnt}"
             if value == 1:
+                if objective == 12:
+                    content += " Attacks from"
                 content += f" {config['race'][str(object['values'][object['valueTypes'].index(value)])]}"
             if value == 2:
                 if objective == 3:
