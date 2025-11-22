@@ -73,20 +73,20 @@ async def mo_processing(orders):
                 if amnt > 1:
                     content += f" {amnt}"
             if value == 1:
-                if objective == 12:
+                if objective == "12":
                     content += " Attacks from"
                 content += f" {config['race'][str(object['values'][object['valueTypes'].index(value)])]}"
             if value == 2:
-                if objective == 3:
+                if objective == "3":
                     content += f" {config['enemies'][str(object['values'][object['valueTypes'].index(value)])]}"
             if value == 12:
-                if objective == 3:
+                if objective == "3":
                     content += " on"
                 planet = info.planets.planets[str(object['values'][object['valueTypes'].index(value)])]["name"]
                 if planet != "Super Earth":
                     content += f" {planet}"
             if value == 5:
-                if objective == 3:
+                if objective == "3":
                     content += " using"
                 content += f" {info.items.item_names[str(object['values'][object['valueTypes'].index(value)])]['name']}"
 
