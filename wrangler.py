@@ -93,11 +93,13 @@ async def mo_processing(orders):
                     content += f" {config['stratagems'][str(object['values'][object['valueTypes'].index(value)])]['name']}"
 
         ind_prog = element["progress"][element["tasks"].index(object)]
-        if ind_prog == 1:
-            content += " (:green_circle:)"
-        if ind_prog == 0:
-            content += " (:red_circle:)"
-        elif ind_prog > 1:
+        binaries = ["11", "12", "13"]
+        if objective in binaries:
+            if ind_prog == 1:
+                content += " (:green_circle:)"
+            if ind_prog == 0:
+                content += " (:red_circle:)"
+        else:
             content += f" \n*{ind_prog * 100 / amnt}% ({ind_prog}/{amnt})*"
 
     for object in element["rewards"]:
