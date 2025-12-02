@@ -23,7 +23,7 @@
 	"11": "Liberate",
 	"12": "Defend",
 	"13": "Hold",
-	"15": "Expand"
+	"15": "Liberate more planets than are lost"
 },
 	"enemies": {
 		"0": "Enemies",
@@ -42,9 +42,14 @@
     "12": "planets"
   },
   "race": {
-    "0": "all Enemies",
-    "1": "Enemies",
-    "3": "Automatons",
-    "2": "Terminids",
-    "4": "Illuminate"}
+  "1": "Enemies",
+  "3": "Automatons",
+  "2": "Terminids",
+  "4": "Illuminate"
+  },
+  "stratagems": {
+    "1520012896":{
+      "name": "Orbital Laser"
+    }
+  }
 }

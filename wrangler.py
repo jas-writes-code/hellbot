@@ -73,22 +73,24 @@ async def mo_processing(orders):
                 if amnt > 1:
                     content += f" {amnt}"
             if value == 1:
-                if objective == "12":
-                    content += " Attacks from"
                 content += f" {config['race'][str(object['values'][object['valueTypes'].index(value)])]}"
             if value == 2:
                 if objective == "3":
                     content += f" {config['enemies'][str(object['values'][object['valueTypes'].index(value)])]}"
             if value == 12:
-                if objective == "3":
-                    content += " on"
                 planet = info.planets.planets[str(object['values'][object['valueTypes'].index(value)])]["name"]
                 if planet != "Super Earth":
-                    content += f" {planet}"
+                    if objective == "3" or "2":
+                        content += " on"
+                        content += f" {planet}"
             if value == 5:
+                print(objective)
                 if objective == "3":
                     content += " using"
-                content += f" {info.items.item_names[str(object['values'][object['valueTypes'].index(value)])]['name']}"
+                try:
+                    content += f" {info.items.item_names[str(object['values'][object['valueTypes'].index(value)])]['name']}"
+                except KeyError:
+                    content += f" {config['stratagems'][str(object['values'][object['valueTypes'].index(value)])]['name']}"
 
         ind_prog = element["progress"][element["tasks"].index(object)]
         if ind_prog == 1:
@@ -111,19 +113,19 @@ async def megacities(planet):
     for city in planet['regions']:
         name = city.get('name') or "*Unknown Megacity*"
         available = city.get('isAvailable', False)
-        health = city.get('health', 0) or 0
-        max_health = city.get('maxHealth', 1) or 0
+        health = city.get('health', 0)
+        max_health = city.get('maxHealth', 1)
         phealth = planet.get('health', 0)
         pmhealth = planet.get('maxHealth', 1)
-        avail_factor = city.get('availabilityFactor', 1) or 0
-        players = city.get('players', 0) or 0
+        avail_factor = city.get('availabilityFactor', 1)
+        players = city.get('players', 0)
 
         degree = 1 - (phealth / pmhealth)
 
         # City availability string
         # Calculate liberation percentage for display
-
         lib_percent = (health * 100 / max_health)
+        print(lib_percent, degree, avail_factor)
 
         status = ""
         # Determine city state
