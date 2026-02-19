@@ -55,7 +55,7 @@ async def forecastMonitor():
 
     for category in flog:
         for item in flog[category]:
-            for stamp in flog[category][item]:
+            for stamp in list(flog[category][item].keys()):
                 if int(stamp) < int(sp) - 8 * 3600:
                     del flog[category][item][stamp]
 
