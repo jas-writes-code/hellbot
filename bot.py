@@ -38,11 +38,14 @@ async def forecastMonitor():
     with open("forecastlog.json", "r") as f:
         flog = json.load(f)
     planets, discard = await hellmonitor.fetch("/api/v1/planets", False)
-    sp = int(time.time())
+    sp = str(int(time.time()))
     for planet in planets:
-        if planet["health"] != planet["maxHealth"]:
-            flog["planets"].setdefault(planet["index"], {})
-            flog["planets"][planet["index"]][sp] = planet["health"]
+        if type(planet["health"]) == int:
+            if planet["health"] != planet["maxHealth"]:
+                flog["planets"].setdefault(planet["index"], {})
+                flog["planets"][planet["index"]][sp] = planet["health"]
+        else:
+            print(planet["health"])
 
         if len(planet["regions"]) > 0:
             for city in planet["regions"]:
@@ -53,7 +56,7 @@ async def forecastMonitor():
     for category in flog:
         for item in flog[category]:
             for stamp in flog[category][item]:
-                if int(stamp) < sp - 8 * 3600:
+                if int(stamp) < int(sp) - 8 * 3600:
                     del flog[category][item][stamp]
 
     with open("forecastlog.json", "w") as f:
