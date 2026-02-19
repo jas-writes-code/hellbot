@@ -73,7 +73,10 @@ async def mo_processing(orders):
                 if amnt > 1:
                     content += f" {amnt}"
             if value == 1:
-                content += f" {config['race'][str(object['values'][object['valueTypes'].index(value)])]}"
+                try:
+                    content += f" {config['race'][str(object['values'][object['valueTypes'].index(value)])]}"
+                except KeyError:
+                    content += " UNKNOWN"
             if value == 2:
                 if objective == "3":
                     content += f" {config['enemies'][str(object['values'][object['valueTypes'].index(value)])]}"
@@ -84,7 +87,7 @@ async def mo_processing(orders):
                         content += " on"
                         content += f" {planet}"
             if value == 5:
-                print(objective)
+                #print(objective)
                 if objective == "3":
                     content += " using"
                 try:
@@ -126,20 +129,20 @@ async def megacities(planet):
 
         # City availability string
         # Calculate liberation percentage for display
-        lib_percent = (health * 100 / max_health)
-        print(lib_percent, degree, avail_factor)
+        lib_percent = 100 - (health * 100 / max_health)
+        #print(lib_percent, degree, avail_factor)
 
         status = ""
         # Determine city state
         if available:
-            status = f"(available since {100 - (avail_factor * 100):.1f}% -- {players} players)"
+            status = f"(available since {(avail_factor * 100):.1f}% -- {players} players)"
         elif health == max_health and avail_factor <= degree:
             # City liberated
-            status = f"(liberated; unlocked at {100 - (avail_factor * 100):.1f}%)"
+            status = f"(liberated; unlocked at {(avail_factor * 100):.1f}%)"
         elif health == max_health and avail_factor > degree:
             # City unavailable
-            status = f"(unavailable; unlocks at {100 - (avail_factor * 100):.1f}%)"
-        else: status = "locked"
+            status = f"(unavailable; unlocks at {(avail_factor * 100):.1f}%)"
+        else: status = "(locked for unknown reason)"
 
         # Display city information
         content += f"\n**{name}** {status}"
