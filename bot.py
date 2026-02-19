@@ -32,6 +32,33 @@ async def monitor():
     if int(state) % 28 == 0:
         await dispatch(target)
 
+@tasks.loop(seconds=600)
+async def forecastMonitor():
+    print("updating forecast log at ", time.time())
+    with open("forecastlog.json", "r") as f:
+        flog = json.load(f)
+    planets, discard = await hellmonitor.fetch("/api/v1/planets", False)
+    sp = int(time.time())
+    for planet in planets:
+        if planet["health"] != planet["maxHealth"]:
+            flog["planets"].setdefault(planet["index"], {})
+            flog["planets"][planet["index"]][sp] = planet["health"]
+
+        if len(planet["regions"]) > 0:
+            for city in planet["regions"]:
+                if city["health"] != city["maxHealth"] and city["health"] is not None:
+                    flog["cities"].setdefault(city["hash"], {})
+                    flog["cities"][city["hash"]][sp] = city["health"]
+
+    for category in flog:
+        for item in flog[category]:
+            for stamp in flog[category][item]:
+                if int(stamp) < sp - 8 * 3600:
+                    del flog[category][item][stamp]
+
+    with open("forecastlog.json", "w") as f:
+        json.dump(flog, f)
+
 async def prio(channel):
     async with (channel.typing()):
         content = "**High-Priority planet status:**\n\n"
@@ -106,7 +133,7 @@ async def major_order(channel):
             if int(mostate) % 28 == 0:
                 content += f"\n\n**NEW {event['title']}:**\n\n{mo_content}"
             else:
-                content += f"\n\n**{event['title']}:**\n\n{mo_content}\n\n"
+                content += f"\n\n**{event['title']}:**\n\n{mo_content}\n"
             content += await wrangler.mo_processing(event)
             content += f'*Expires <t:{int(await wrangler.retime(event["expiration"]))}:R>*'
 
@@ -152,6 +179,7 @@ async def on_ready():
         print("\033[91mWARNING: Automated monitoring is enabled.\033[0m")
         print("If you don't want this, stop the bot and set the option in key.json to 0.")
         monitor.start()
+    forecastMonitor.start()
     print("The bot works -- this terminal will not provide further feedback unless there is an error. It's safe to detatch this window.")
 
 @client.event
