@@ -201,4 +201,11 @@ async def on_message(message):
             else:
                 print(f"No function defined for action '{action_name}'")
 
+#monitor error handling
+async def oopsie_daisy(exc):
+    print(f"\033[91mAPI Error: {type(exc).__name__}: {exc}\033[0m")
+
+#go go go
+forecastMonitor.error(oopsie_daisy)
+monitor.error(oopsie_daisy)
 client.run(key)
