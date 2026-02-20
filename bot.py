@@ -42,16 +42,18 @@ async def forecastMonitor():
     for planet in planets:
         if type(planet["health"]) == int:
             if planet["health"] != planet["maxHealth"]:
-                flog["planets"].setdefault(planet["index"], {})
-                flog["planets"][planet["index"]][sp] = planet["health"]
+                planet_id = str(planet["index"])
+                flog["planets"].setdefault(planet_id, {})
+                flog["planets"][planet_id][sp] = planet["health"]
         else:
             print(planet["health"])
 
         if len(planet["regions"]) > 0:
             for city in planet["regions"]:
                 if city["health"] != city["maxHealth"] and city["health"] is not None:
-                    flog["cities"].setdefault(city["hash"], {})
-                    flog["cities"][city["hash"]][sp] = city["health"]
+                    city_id = str(city["hash"])
+                    flog["cities"].setdefault(city_id, {})
+                    flog["cities"][city_id][sp] = city["health"]
 
     for category in flog:
         for item in flog[category]:
