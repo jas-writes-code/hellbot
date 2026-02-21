@@ -1,8 +1,7 @@
-import time
+import time, shlex, json
 from discord.ext import tasks
 from discord import *
-import hellmonitor, wrangler, info
-import json
+import hellmonitor, wrangler, info, forecaster
 
 client = Client(intents=Intents.all())
 with open("key.json", "r") as file:
@@ -34,37 +33,20 @@ async def monitor():
 
 @tasks.loop(seconds=600)
 async def forecastMonitor():
-    print("updating forecast log at ", time.time())
-    with open("forecastlog.json", "r") as f:
-        flog = json.load(f)
-    planets, discard = await hellmonitor.fetch("/api/v1/planets", False)
-    sp = str(int(time.time()))
-    for planet in planets:
-        if type(planet["health"]) == int:
-            if planet["health"] != planet["maxHealth"]:
-                planet_id = str(planet["index"])
-                flog["planets"].setdefault(planet_id, {})
-                flog["planets"][planet_id][sp] = planet["health"]
-        else:
-            print(planet["health"])
+    await forecaster.updateLog()
 
-        if len(planet["regions"]) > 0:
-            for city in planet["regions"]:
-                if city["health"] != city["maxHealth"] and city["health"] is not None:
-                    city_id = str(city["hash"])
-                    flog["cities"].setdefault(city_id, {})
-                    flog["cities"][city_id][sp] = city["health"]
+async  def forecast(channel, item):
+    async with channel.typing():
+        planet = " ".join(item)
 
-    for category in flog:
-        for item in flog[category]:
-            for stamp in list(flog[category][item].keys()):
-                if int(stamp) < int(sp) - 8 * 3600:
-                    del flog[category][item][stamp]
+        content = f"**Forecasted Liberation for {planet.title()}:**\n"
+        content += "> "
 
-    with open("forecastlog.json", "w") as f:
-        json.dump(flog, f)
+        content += await forecaster.search_and_fcast(planet)
 
-async def prio(channel):
+        await channel.send(content)
+
+async def prio(channel, blank):
     async with (channel.typing()):
         content = "**High-Priority planet status:**\n\n"
         prios = []
@@ -117,7 +99,7 @@ async def prio(channel):
         for item in messages:
             await channel.send(item)
 
-async def major_order(channel):
+async def major_order(channel, blank):
     async with (channel.typing()):
         content = ""
         mo, mostate = await hellmonitor.fetch("/api/v1/assignments", True)
@@ -149,7 +131,7 @@ async def major_order(channel):
         for item in messages:
             await channel.send(item)
 
-async def dispatch(channel):
+async def dispatch(channel, blank):
     async with channel.typing():
         content = ""
         dis, distate = await hellmonitor.fetch("/api/v1/dispatches", True)
@@ -192,14 +174,14 @@ async def on_message(message):
     if not message.author.bot or message.author.system:
         with open('config.json', 'r') as f:
             commands = json.load(f)
-        parts = message.content.strip().split()
+        parts = shlex.split(message.content.strip())
         cmd = parts[0].lstrip("!")  # remove "!"
         args = parts[1:]
         if cmd in commands:
             action_name = commands[cmd]["action"]
             func = globals().get(action_name)  # look up function by name
             if callable(func):
-                await func(message.channel)
+                await func(message.channel, args)
             else:
                 print(f"No function defined for action '{action_name}'")
 

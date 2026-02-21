@@ -1,15 +1,23 @@
 {
   "mo": {
     "description": "Fetches the latest Major Order(s) and Briefing(s)",
-    "action": "major_order"
+    "action": "major_order",
+    "args": []
   },
-  "dispatch": {
+  "dp": {
     "description": "Fetches the latest dispatches.",
-    "action": "dispatch"
+    "action": "dispatch",
+    "args": []
   },
   "prio": {
     "description": "Displays the status of high-priority planets.",
-    "action": "prio"
+    "action": "prio",
+    "args": []
+  },
+  "fc": {
+    "description": "Estimates liberation time for a planet or city",
+    "action": "forecast",
+    "args": ["name"]
   },
 	"rewards": {
 		"1": "Medals"
