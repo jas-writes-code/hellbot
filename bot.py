@@ -173,19 +173,20 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if not message.author.bot or message.author.system:
-        with open('config.json', 'r') as f:
-            commands = json.load(f)
-        parts = shlex.split(message.content.strip())
-        cmd = parts[0].lstrip("!")  # remove "!"
-        args = parts[1:]
-        if cmd in commands:
-            action_name = commands[cmd]["action"]
-            func = globals().get(action_name)  # look up function by name
-            if callable(func):
-                await func(message.channel, args)
-            else:
-                print(f"No function defined for action '{action_name}'")
+    if message.content.startswith("!"):
+        if not message.author.bot or message.author.system:
+            with open('config.json', 'r') as f:
+                commands = json.load(f)
+            parts = shlex.split(message.content.strip())
+            cmd = parts[0].lstrip("!")  # remove "!"
+            args = parts[1:]
+            if cmd in commands:
+                action_name = commands[cmd]["action"]
+                func = globals().get(action_name)  # look up function by name
+                if callable(func):
+                    await func(message.channel, args)
+                else:
+                    print(f"No function defined for action '{action_name}'")
 
 #monitor error handling
 async def oopsie_daisy(loop, error):
