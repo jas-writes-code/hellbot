@@ -37,13 +37,15 @@ async def forecastMonitor():
 
 async  def forecast(channel, item):
     async with channel.typing():
-        planet = " ".join(item)
 
-        content = f"**Forecasted Liberation for {planet.title()}:**\n"
-        content += "> "
-
-        content += await forecaster.search_and_fcast(planet)
-
+        if len(item) > 0:
+            planet = " ".join(item)
+            content = f"**Forecasted Liberation for {planet.title()}:**\n"
+            content += "> "
+            content += await forecaster.search_and_fcast(planet)
+        else:
+            content = f"**Galactic War General Forecast:**\n"
+            content += await forecaster.fcast_all()
         await channel.send(content)
 
 async def prio(channel, blank):

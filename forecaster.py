@@ -11,9 +11,9 @@ async def forecast(area, name):
         for check in flog[area][name]:
             times.append((check, flog[area][name][check]))
     except KeyError:
-        return "no logged data; planet inactive or bottlenecked by city liberation"
+        return "item not in log; inactive or bottlenecked by city liberation"
     if len(times) <= 1:
-        return "no forecast"
+        return "item in log but no data is available; likely concluded but not yet deleted"
     for element in times:
         if times.index(element) == 0:
             continue
@@ -37,7 +37,9 @@ async def forecast(area, name):
         projection += int(times[-1][0])
         projection = f"<t:{int(projection)}:R>"
 
-    return f"{str.title(name['name'])}: {round(avg * -6, 2)} dph, forecast {projection}"
+    recent = f"<t:{times[-1][0]}:R>"
+
+    return f"{str.title(name['name'])}: {round(avg * -6, 2)} dph, estimated {projection} | last updated {recent}"
 
 async def search_and_fcast(name):
     name = name.upper()
@@ -48,6 +50,15 @@ async def search_and_fcast(name):
         if data.planets.planetRegion[element]["name"].upper() == name:
             return await forecast("cities", element)
     return "planet/city not found"
+
+async def fcast_all():
+    with open("forecastlog.json", "r") as f:
+        flog = json.load(f)
+    content = ""
+    for area in flog:
+        for name in flog[area]:
+            content += f"> {await forecast(area, name)}\n"
+    return content
 
 async def updateLog():
     print("updating forecast log at ", time.time())
@@ -71,11 +82,14 @@ async def updateLog():
                     flog["cities"].setdefault(city_id, {})
                     flog["cities"][city_id][sp] = city["health"]
 
-    for category in flog:
-        for item in flog[category]:
+    cutoff = int(sp) - 8 * 3600
+    for category in flog: # delete anything old/empty
+        for item in list(flog[category].keys()):
             for stamp in list(flog[category][item].keys()):
-                if int(stamp) < int(sp) - 8 * 3600:
+                if int(stamp) < cutoff:
                     del flog[category][item][stamp]
+            if not flog[category][item]:
+                del flog[category][item]
 
     with open("forecastlog.json", "w") as f:
         json.dump(flog, f)
