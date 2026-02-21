@@ -37,7 +37,7 @@ async def forecast(area, name):
         projection += int(times[-1][0])
         projection = f"<t:{int(projection)}:R>"
 
-    return f"{str.title(name["name"])}: {round(avg * -6, 2)} dph, forecast {projection}"
+    return f"{str.title(name['name'])}: {round(avg * -6, 2)} dph, forecast {projection}"
 
 async def search_and_fcast(name):
     name = name.upper()
