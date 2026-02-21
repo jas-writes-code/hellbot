@@ -37,9 +37,25 @@ async def forecast(area, name):
         projection += int(times[-1][0])
         projection = f"<t:{int(projection)}:R>"
 
-    recent = f"<t:{times[-1][0]}:R>"
+    # % change in health 1hr, 4hrs, 8hrs
+    hrstat = 100 - (100 * times[-1][1] / times[int(7 * len(times) / 8)][1])
+    hrhrstat = 100 - (100 * times[-1][1] / times[int(len(times) / 2)][1])
+    hrhrhrstat = 100 - (100 * times[-1][1] / times[0][1])
+    stats = [hrstat, hrhrstat, hrhrhrstat]
+    formatted = []
+    for value in stats:
+        if value < 0:
+            formatted.append(f":small_red_triangle_down: {value:.2f}% ")
+        elif value > 0:
+            formatted.append(f":small_red_triangle: {value:.2f}% ")
+        else:
+            formatted.append(f":red_circle: {value:.2f}% ")
+    hrstat, hrhrstat, hrhrhrstat = formatted
 
-    return f"{str.title(name['name'])}: {round(avg * -6, 2)} dph, estimated {projection} | last updated {recent}"
+    recent = round((int(time.time()) - int(times[-1][0])) / 60, 2)
+    content = f"{str.title(name['name'])}: {round(avg * -6, 2)}dph, est {projection}, {recent}min(s)\n"
+    content += f"1hr {hrstat} 4hr {hrhrstat} 8hr {hrhrhrstat}\n"
+    return content
 
 async def search_and_fcast(name):
     name = name.upper()
