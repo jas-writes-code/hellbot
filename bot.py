@@ -142,13 +142,19 @@ async def dispatch(channel, blank):
             return
         if int(distate) % 28 == 0:
             content += "**NEW DISPATCHES:**\n\n"
+            for element in dis:
+                if element["id"] > distate / 28 and distate % 28 == 0:
+                    content += "      **UNREAD**"
+                    content += f'\n{await wrangler.sanitize(element["message"])}\n-----\n\n'
+                else:
+                    break
         else:
             content += "No updates since last check. Most recent Dispatches:\n\n"
-        for element in dis[:5]:
-            content += f'*Issued <t:{int(await wrangler.retime(element["published"]))}:R>*'
-            if element["id"] > distate / 28 and distate % 28 == 0:
-                content += "      **UNREAD**"
-            content += f'\n{await wrangler.sanitize(element["message"])}\n-----\n\n'
+            for element in dis[:5]:
+                content += f'*Issued <t:{int(await wrangler.retime(element["published"]))}:R>*'
+                if element["id"] > distate / 28 and distate % 28 == 0:
+                    content += "      **UNREAD**"
+                content += f'\n{await wrangler.sanitize(element["message"])}\n-----\n\n'
     content += '*Showing 5 most recent Dispatches.*'
     try:
         await channel.send(content)
