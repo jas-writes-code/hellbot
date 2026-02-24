@@ -118,12 +118,12 @@ async def megacities(planet):
     for city in planet['regions']:
         name = city.get('name') or "*Unknown Megacity*"
         available = city.get('isAvailable', False)
-        health = city.get('health', 0)
-        max_health = city.get('maxHealth', 1)
+        health = city.get('health', 0) or 0
+        max_health = city.get('maxHealth', 1) or 0
         phealth = planet.get('health', 0)
         pmhealth = planet.get('maxHealth', 1)
-        avail_factor = city.get('availabilityFactor', 1)
-        players = city.get('players', 0)
+        avail_factor = city.get('availabilityFactor', 1) or 0
+        players = city.get('players', 0) or 0
 
         degree = 1 - (phealth / pmhealth)
 
@@ -135,14 +135,14 @@ async def megacities(planet):
         status = ""
         # Determine city state
         if available:
-            status = f"(available since {(avail_factor * 100):.1f}% -- {players} players)"
+            status = f"(available since {(100 - avail_factor * 100):.1f}% -- {players} players)"
         elif health == max_health and avail_factor <= degree:
             # City liberated
-            status = f"(liberated; unlocked at {(avail_factor * 100):.1f}%)"
+            status = f"(liberated; unlocked at {(100 - avail_factor * 100):.1f}%)"
         elif health == max_health and avail_factor > degree:
             # City unavailable
-            status = f"(unavailable; unlocks at {(avail_factor * 100):.1f}%)"
-        else: status = "(locked for unknown reason)"
+            status = f"(unavailable; unlocks at {(100 - avail_factor * 100):.1f}%)"
+        else: status = f"(locked, available from {(avail_factor * 100):.1f}%"
 
         # Display city information
         content += f"\n**{name}** {status}"
