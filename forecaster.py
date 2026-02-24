@@ -1,6 +1,56 @@
-import json, time
+import json, time, math
 import info, hellmonitor
 data = info.load_json_files("json")
+
+async def project(times, decay):
+    #this hurts my head
+
+    if len(times) < 2:
+        return "n/a"
+
+    # convert half-life (hours) → lambda
+    half_life = decay * 3600
+    lambda_ = math.log(2) / half_life
+
+    now = times[-1][0]
+
+    S_w = 0
+    S_wx = 0
+    S_wy = 0
+    S_wxx = 0
+    S_wxy = 0
+
+    for t, h in times:
+        age = now - t
+        w = math.exp(-lambda_ * age)
+
+        S_w += w
+        S_wx += w * t
+        S_wy += w * h
+        S_wxx += w * t * t
+        S_wxy += w * t * h
+
+    denominator = S_w * S_wxx - S_wx * S_wx
+
+    if denominator == 0:
+        return "n/a"
+
+    slope = (S_w * S_wxy - S_wx * S_wy) / denominator
+
+    # Only forecast if health is decreasing
+    if slope >= 0:
+        return "n/a"
+
+    intercept = (S_wy - slope * S_wx) / S_w
+
+    # Solve for health = 0
+    t_zero = -intercept / slope
+
+    # Prevent nonsense past predictions
+    if t_zero <= now:
+        return "n/a"
+
+    return f"<t:{int(t_zero)}:R>"
 
 async def forecast(area, id):
     with open("forecastlog.json", "r") as f:
@@ -15,9 +65,9 @@ async def forecast(area, id):
         for check in flog[area][id]:
             times.append((int(check), flog[area][id][check]))
     except KeyError:
-        return f"{name['name']}: item not in log; inactive or bottlenecked by city liberation\n"
+        return f"{name['name'].title()}: item not in log; inactive or bottlenecked by city liberation\n"
     if len(times) <= 1:
-        return f"{name['name']}: item in log but no data is available; probably recently started or concluded\n"
+        return f"{name['name'].title()}: item in log but no data is available; probably recently started or concluded\n"
     for element in times:
         if times.index(element) == 0:
             continue
@@ -30,12 +80,7 @@ async def forecast(area, id):
         healths.append(element[1])
     avg = total / len(diffs)
 
-    projection = "n/a"
-    if avg < 0:
-        projection = times[-1][1] / (avg * -1)
-        projection *= 600
-        projection += int(times[-1][0])
-        projection = f"<t:{int(projection)}:R>"
+    projection = await project(times, 4)
 
     # % change in health 1hr, 4hrs, 8hrs
     now = int(times[-1][0])
