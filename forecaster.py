@@ -2,26 +2,26 @@ import json, time
 import info, hellmonitor
 data = info.load_json_files("json")
 
-async def forecast(area, name):
+async def forecast(area, id):
     with open("forecastlog.json", "r") as f:
         flog = json.load(f)
     times = []
     diffs = []
+    if area == "cities":
+        name = data.planets.planetRegion[id]
+    else:
+        name = data.planets.planets[id]
     try:
-        for check in flog[area][name]:
-            times.append((check, flog[area][name][check]))
+        for check in flog[area][id]:
+            times.append((int(check), flog[area][id][check]))
     except KeyError:
-        return "item not in log; inactive or bottlenecked by city liberation"
+        return f"{name['name']}: item not in log; inactive or bottlenecked by city liberation\n"
     if len(times) <= 1:
-        return "item in log but no data is available; likely concluded but not yet deleted"
+        return f"{name['name']}: item in log but no data is available; probably recently started or concluded\n"
     for element in times:
         if times.index(element) == 0:
             continue
         diffs.append((element[0], element[1] - times[times.index(element) - 1][1]))
-    if area == "cities":
-        name = data.planets.planetRegion[name]
-    else:
-        name = data.planets.planets[name]
 
     total = 0
     healths = []
@@ -38,13 +38,24 @@ async def forecast(area, name):
         projection = f"<t:{int(projection)}:R>"
 
     # % change in health 1hr, 4hrs, 8hrs
-    hrstat = 100 - (100 * times[-1][1] / times[int(7 * len(times) / 8)][1])
-    hrhrstat = 100 - (100 * times[-1][1] / times[int(len(times) / 2)][1])
-    hrhrhrstat = 100 - (100 * times[-1][1] / times[0][1])
-    stats = [hrstat, hrhrstat, hrhrhrstat]
+    now = int(times[-1][0])
+    current = int(times[-1][1])
+    targets = [now - 3600, now - 4 * 3600, now - 8 * 3600]
+    stats = []
+    for target in targets:
+        # find most recent point at or before the target
+        candidates = [h for t, h in times if t <= target]
+        if candidates and candidates[-1] != 0:
+            past = candidates[-1]
+            change = 100 - (100 * current / past)
+            stats.append(change)
+        else:
+            stats.append(None)
     formatted = []
     for value in stats:
-        if value < 0:
+        if value is None:
+            formatted.append(":red_circle: N/A ")
+        elif value < 0:
             formatted.append(f":small_red_triangle_down: {value:.2f}% ")
         elif value > 0:
             formatted.append(f":small_red_triangle: {value:.2f}% ")
