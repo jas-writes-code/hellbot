@@ -1,4 +1,4 @@
-import json, time, math
+import json, time, math, tempfile, os
 import info, hellmonitor
 data = info.load_json_files("json")
 
@@ -82,6 +82,9 @@ async def forecast(area, id):
 
     projection = await project(times, 4)
 
+    print(len(diffs), diffs)
+    print(len(times), times)
+
     # % change in health 1hr, 4hrs, 8hrs
     now = int(times[-1][0])
     current = int(times[-1][1])
@@ -154,7 +157,7 @@ async def updateLog():
                     flog["cities"].setdefault(city_id, {})
                     flog["cities"][city_id][sp] = city["health"]
 
-    cutoff = int(sp) - 8 * 3600
+    cutoff = int(sp) - 9 * 3600
     for category in flog: # delete anything old/empty
         for item in list(flog[category].keys()):
             for stamp in list(flog[category][item].keys()):
@@ -163,5 +166,7 @@ async def updateLog():
             if not flog[category][item]:
                 del flog[category][item]
 
-    with open("forecastlog.json", "w") as f:
+    tmp_path = "forecastlog.json.tmp"
+    with open(tmp_path, "w") as f:
         json.dump(flog, f)
+    os.replace(tmp_path, "forecastlog.json")
