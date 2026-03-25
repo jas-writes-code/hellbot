@@ -85,7 +85,7 @@ async def mo_processing(orders):
                 if planet != "Super Earth":
                     if objective == "3" or objective == "2":
                         content += " on"
-                        content += f" {planet}"
+                    content += f" {planet}"
             if value == 5:
                 #print(objective)
                 if objective == "3":
