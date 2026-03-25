@@ -155,7 +155,7 @@ async def dispatch(channel, blank):
                 if element["id"] > distate / 28 and distate % 28 == 0:
                     content += "      **UNREAD**"
                 content += f'\n{await wrangler.sanitize(element["message"])}\n-----\n\n'
-    content += '*Showing 5 most recent Dispatches.*'
+            content += '*Showing 5 most recent Dispatches.*'
     try:
         await channel.send(content)
     except errors.HTTPException:

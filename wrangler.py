@@ -83,7 +83,7 @@ async def mo_processing(orders):
             if value == 12:
                 planet = info.planets.planets[str(object['values'][object['valueTypes'].index(value)])]["name"]
                 if planet != "Super Earth":
-                    if objective == "3" or "2":
+                    if objective == "3" or objective == "2":
                         content += " on"
                         content += f" {planet}"
             if value == 5:
